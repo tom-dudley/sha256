@@ -90,6 +90,37 @@ func TestFractionalPartOfCubeRoot(t *testing.T) {
 	}
 }
 
+func TestFractionalPartOfSquare(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		expected uint32
+	}{
+		{
+			name:     "2",
+			number:   2,
+			expected: uint32(0x6a09e667),
+		},
+		{
+			name:     "3",
+			number:   3,
+			expected: uint32(0xbb67ae85),
+		},
+		{
+			name:     "8th prime",
+			number:   getPrimeNumber(8),
+			expected: uint32(0x5be0cd19),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fractionalPart := fractionalPartOfSquareRoot(test.number)
+			require.Equal(t, test.expected, fractionalPart)
+		})
+	}
+}
+
 func TestGetPrimeNumber(t *testing.T) {
 	tests := []struct {
 		name     string

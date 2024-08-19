@@ -30,6 +30,13 @@ func fractionalPartOfCubeRoot(n int) uint32 {
 	return uint32(scaled)
 }
 
+func fractionalPartOfSquareRoot(n int) uint32 {
+	res := math.Sqrt(float64(n))
+	_, fractional := math.Modf(res)
+	scaled := fractional * (1 << 32)
+	return uint32(scaled)
+}
+
 func getPrimeNumber(n int) int {
 	primes := []int{}
 	i := 1
