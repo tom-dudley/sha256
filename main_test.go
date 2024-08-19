@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -18,6 +20,7 @@ func messageLength(message string) []byte {
 // The message has a '1' bit appended and then '0's up until
 // 64 bits from the end of the last block, then append the length
 // of the message as a a big endian 64 bit int (8 bytes).
+// TODO: These tests are currently failing on a last byte mismatch
 func TestPadMessage(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -32,7 +35,7 @@ func TestPadMessage(t *testing.T) {
 			expected: append(
 				[]byte{'H', 'e', 'l', 'l', 'o', 0b10000000},
 				append(
-					bytes.Repeat([]byte{'0'}, calculateZeroBits(len("Hello"))/8),
+					bytes.Repeat([]byte{0x00}, calculateZeroBits(len("Hello"))/8),
 					messageLength("Hello")...,
 				)...,
 			),
@@ -43,7 +46,7 @@ func TestPadMessage(t *testing.T) {
 			expected: append(
 				[]byte{'A', 'n', 'o', 't', 'h', 'e', 'r', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e', 0b10000000},
 				append(
-					bytes.Repeat([]byte{'0'}, calculateZeroBits(len("Another message"))/8),
+					bytes.Repeat([]byte{0x00}, calculateZeroBits(len("Another message"))/8),
 					messageLength("Another message")...,
 				)...,
 			),
@@ -170,4 +173,41 @@ func TestGetPrimeNumber(t *testing.T) {
 			require.Equal(t, test.expected, primeNumber)
 		})
 	}
+}
+
+func TestBytesToUint32(t *testing.T) {
+	b0 := byte(0x12)
+	b1 := byte(0x34)
+	b2 := byte(0x56)
+	b3 := byte(0x78)
+
+	require.Equal(t, uint32(0x12345678), bytesToUint32(b0, b1, b2, b3))
+}
+
+func TestRotr(t *testing.T) {
+	x := uint32(0x4d2c6ea2)
+	shift := 4
+	expected := uint32(0x24d2c6ea)
+
+	actual := rotr(shift, x)
+	require.Equal(t, expected, actual)
+}
+
+func TestGetWordFromMessageBlock(t *testing.T) {
+	message := []byte{0x4b, 0xbb, 0x12, 0x6f, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}
+	paddedMessage := padMessage(message)
+	messageBlocks := parseMessage(paddedMessage)
+	messageBlock := messageBlocks[0]
+
+	require.Equal(t, bytesToUint32(0x4b, 0xbb, 0x12, 0x6f), getWordFromMessageBlock(messageBlock, 0))
+	require.Equal(t, bytesToUint32(0xaa, 0xbb, 0xcc, 0xdd), getWordFromMessageBlock(messageBlock, 1))
+	require.Equal(t, bytesToUint32(0xee, 0xff, 0x80, 0x00), getWordFromMessageBlock(messageBlock, 2))
+}
+
+func TestSha256Hash(t *testing.T) {
+	message := []byte("It works!")
+	hash := sha256.Sum256(message)
+	hashHex := hex.EncodeToString(hash[:])
+
+	require.Equal(t, hashHex, sha256Digest(message))
 }
