@@ -59,6 +59,31 @@ func TestPadMessage(t *testing.T) {
 	}
 }
 
+func TestCalculateZeros(t *testing.T) {
+	tests := []struct {
+		name          string
+		messageLength int
+		expected      int
+	}{
+		{
+			name:          "3 bytes",
+			messageLength: 3,
+			expected:      423,
+		},
+		{
+			name:          "1000 bytes",
+			messageLength: 1000,
+			expected:      127,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			require.Equal(t, test.expected, calculateZeros(test.messageLength))
+		})
+	}
+}
+
 func TestFractionalPartOfCubeRoot(t *testing.T) {
 	tests := []struct {
 		name     string
