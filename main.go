@@ -5,10 +5,47 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"strings"
 )
 
 func main() {
-	fmt.Println("TODO")
+	message := strings.Repeat("a", 3000)
+	fmt.Printf("Calculating SHA-256 for '%s'\n", message)
+
+	// Key steps:
+	// - Preprocess
+	//   - Pad the message
+	//   - Parse the message
+	// - Hash
+
+	// Step 1: Pad the message
+	paddedMessage := padMessage([]byte(message))
+	bitsInPaddedMessage := len(paddedMessage) * 8
+	chunksInPaddedMessage := bitsInPaddedMessage / 512
+	fmt.Printf("The padded message is %d bits long\n", bitsInPaddedMessage)
+	fmt.Printf("The padded message consists of %d 512-bit chunks\n", chunksInPaddedMessage)
+
+	// Step 2: Parse the message
+	parsedMessage := parseMessage(paddedMessage)
+	fmt.Printf("Parsed message has %d chunks\n", len(parsedMessage))
+
+	// Step 3: Perform hashing
+	// TODO
+}
+
+// parseMessage parses a message into 512-bit sized chunks
+// for SHA-256 as defined in section 5.2.1 of FIPS 180-4
+func parseMessage(message []byte) [][]byte {
+	var chunks [][]byte
+
+	chunkSize := 512 / 8
+
+	for i := 0; i < len(message); i += chunkSize {
+		end := i + chunkSize
+		chunks = append(chunks, message[i:end])
+	}
+
+	return chunks
 }
 
 func padMessage(message []byte) []byte {
@@ -16,7 +53,7 @@ func padMessage(message []byte) []byte {
 	padded = append(padded, 0b10000000)
 	// Padded message is: message plus 1 '1' bit, plus N '0' bits plus (message as big endian 64 bit int)
 	// N grows in order to ensure that the padded message ends on a 512 bit (64 byte) boundary (required for the hash function)
-	zeroBytes := 64 - 1 - 8 - len(message)
+	zeroBytes := calculateZeroBits(len(message)) / 8
 	padded = append(padded, bytes.Repeat([]byte{'0'}, zeroBytes)...)
 	padded = binary.BigEndian.AppendUint64(padded, uint64(len(message)))
 
@@ -102,7 +139,7 @@ func calculateZeroBits(lengthInBytes int) int {
 		// then a 64 bit int won't fit in the 1024 bits from 2 blocks.
 
 		// 960 = 448 + 512
-		zeros = 960 - bitsConsumedInLastBlock + 1
+		zeros = 960 - bitsConsumedInLastBlock
 		fmt.Println("Less than 64 bits remaining")
 		fmt.Printf("Zeroes: %d\n", zeros)
 	}
@@ -114,9 +151,3 @@ func calculateZeroBits(lengthInBytes int) int {
 
 	return zeros
 }
-
-// Key steps:
-// - Preprocess
-//   - Pad the message
-//   - Parse the message
-// - Hash
