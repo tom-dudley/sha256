@@ -80,8 +80,8 @@ func kConstant(i int) uint32 {
 	return fractionalPartOfCubeRoot(getPrimeNumber(i + 1))
 }
 
-// calculateZeros implements section 5.1.1 of FIPS 180-4
-func calculateZeros(lengthInBytes int) int {
+// calculateZeroBits implements section 5.1.1 of FIPS 180-4
+func calculateZeroBits(lengthInBytes int) int {
 	lengthInBits := lengthInBytes * 8
 	// Each block is 512 bits. We can effectively discard each full block.
 	// We are required to pad a '1' bit.

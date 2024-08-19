@@ -32,7 +32,7 @@ func TestPadMessage(t *testing.T) {
 			expected: append(
 				[]byte{'H', 'e', 'l', 'l', 'o', 0b10000000},
 				append(
-					bytes.Repeat([]byte{'0'}, 64-8-1-len("Hello")),
+					bytes.Repeat([]byte{'0'}, calculateZeroBits(len("Hello"))/8),
 					messageLength("Hello")...,
 				)...,
 			),
@@ -43,7 +43,7 @@ func TestPadMessage(t *testing.T) {
 			expected: append(
 				[]byte{'A', 'n', 'o', 't', 'h', 'e', 'r', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e', 0b10000000},
 				append(
-					bytes.Repeat([]byte{'0'}, 64-8-1-len("Another message")),
+					bytes.Repeat([]byte{'0'}, calculateZeroBits(len("Another message"))/8),
 					messageLength("Another message")...,
 				)...,
 			),
@@ -59,7 +59,7 @@ func TestPadMessage(t *testing.T) {
 	}
 }
 
-func TestCalculateZeros(t *testing.T) {
+func TestCalculateZeroBits(t *testing.T) {
 	tests := []struct {
 		name          string
 		messageLength int
@@ -79,7 +79,7 @@ func TestCalculateZeros(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			require.Equal(t, test.expected, calculateZeros(test.messageLength))
+			require.Equal(t, test.expected, calculateZeroBits(test.messageLength))
 		})
 	}
 }
