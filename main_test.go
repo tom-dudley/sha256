@@ -58,3 +58,60 @@ func TestPadMessage(t *testing.T) {
 		})
 	}
 }
+
+func TestFractionalPartOfCubeRoot(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		expected uint32
+	}{
+		{
+			name:     "2",
+			number:   2,
+			expected: uint32(0x428a2f98),
+		},
+		{
+			name:     "3",
+			number:   3,
+			expected: uint32(0x71374491),
+		},
+		{
+			name:     "64th prime",
+			number:   getPrimeNumber(64),
+			expected: uint32(0xc67178f2),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fractionalPart := fractionalPartOfCubeRoot(test.number)
+			require.Equal(t, test.expected, fractionalPart)
+		})
+	}
+}
+
+func TestGetPrimeNumber(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		expected int
+	}{
+		{
+			name:     "Get 2nd prime number",
+			number:   2,
+			expected: 3,
+		},
+		{
+			name:     "Get 10th prime number",
+			number:   10,
+			expected: 29,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			primeNumber := getPrimeNumber(test.number)
+			require.Equal(t, test.expected, primeNumber)
+		})
+	}
+}

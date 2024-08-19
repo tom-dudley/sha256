@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
 )
 
 func main() {
@@ -20,4 +21,37 @@ func padMessage(message []byte) []byte {
 	padded = binary.BigEndian.AppendUint64(padded, uint64(len(message)))
 
 	return padded
+}
+
+func fractionalPartOfCubeRoot(n int) uint32 {
+	res := math.Pow(float64(n), 1.0/3)
+	_, fractional := math.Modf(res)
+	scaled := fractional * (1 << 32)
+	return uint32(scaled)
+}
+
+func getPrimeNumber(n int) int {
+	primes := []int{}
+	i := 1
+next:
+	for {
+		i++
+
+		if len(primes) == n {
+			return primes[n-1]
+		}
+
+		// Iterate primes checking if each prime divides i
+		for j := 0; j < len(primes); j++ {
+			p := primes[j]
+			if p > i {
+				continue
+			}
+			if i%p == 0 {
+				goto next
+			}
+		}
+
+		primes = append(primes, i)
+	}
 }
