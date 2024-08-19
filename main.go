@@ -239,6 +239,9 @@ func calculateZeroBits(lengthInBytes int) int {
 	return zeros
 }
 
+// The following functions are defined in
+// sections 3.2 and 4.1.2 of FIPS 180-4
+
 // Choice function
 func ch(x, y, z uint32) uint32 {
 	return (x & y) ^ (^x & z)
